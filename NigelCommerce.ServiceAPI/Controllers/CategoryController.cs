@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using NigelCommerce.DAL;
 using NigelCommerce.DAL.Models;
+using System;
+using System.Collections.Generic;
 
 namespace NigelCommerce.ServiceAPI.Controllers
 {
@@ -19,102 +21,110 @@ namespace NigelCommerce.ServiceAPI.Controllers
 
         [HttpGet]
         [Authorize(Policy = "CustomerPolicy")]
-        public JsonResult GetCategories()
+        public IActionResult GetCategories()
         {
-            List<Category> category = new List<Category>();
             try
             {
-                category = repository.GetAllCategories();
+                var categories = repository.GetAllCategories();
+                if (categories == null)
+                    return NotFound();
+                return Ok(categories);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                category = null;
+                return StatusCode(500, "Internal server error");
             }
-            return Json(category);
         }
 
 
         [HttpGet]
         [Authorize(Policy = "CustomerPolicy")]
-        public JsonResult GetCategoryById(byte categoryId)
+        public IActionResult GetCategoryById(byte categoryId)
         {
-            Category category;
             try
             {
-                category = repository.GetCategoryById(categoryId);
+                var category = repository.GetCategoryById(categoryId);
+                if (category == null)
+                    return NotFound();
+                return Ok(category);
             }
             catch (Exception)
             {
-                category = null;
+                return StatusCode(500, "Internal server error");
             }
-            return Json(category);
         }
 
 
         [HttpPost]
         [Authorize(Policy = "CustomerPolicy")]
-        public JsonResult AddCategoryUsingModels(Category category)
+        public IActionResult AddCategoryUsingModels([FromBody] Category category)
         {
-            bool status = false;
-            string message;
+            if (category == null)
+                return BadRequest("Category is required.");
 
             try
             {
-                status = repository.AddCategory(category);
+                var status = repository.AddCategory(category);
                 if (status)
                 {
-                    message = "Successful addition operation, CategoryId = " + category.CategoryId;
+                    return CreatedAtAction(nameof(GetCategoryById), new { categoryId = category.CategoryId }, category);
                 }
                 else
                 {
-                    message = "Unsuccessful addition operation!";
+                    return BadRequest("Unsuccessful addition operation.");
                 }
             }
             catch (Exception)
             {
-                message = "Some error occured, please try again!";
+                return StatusCode(500, "Internal server error");
             }
-            return Json(message);
         }
 
 
         [HttpPut]
         [Authorize(Policy = "ManagerPolicy")]
-        public bool UpdateCategoryByByAPIModels(NigelCommerce.ServiceAPI.Models.Categories category)
+        public IActionResult UpdateCategoryByByAPIModels([FromBody] NigelCommerce.ServiceAPI.Models.Categories category)
         {
-            bool result = false;
+            if (category == null)
+                return BadRequest("Category is required.");
+
             try
             {
-                Category catObj = new Category();
-                catObj.CategoryId = category.CategoryId;
-                catObj.CategoryName = category.CategoryName;
+                Category catObj = new Category
+                {
+                    CategoryId = category.CategoryId,
+                    CategoryName = category.CategoryName
+                };
 
-                result = repository.UpdateCategory(catObj.CategoryId, catObj.CategoryName);
+                var result = repository.UpdateCategory(catObj.CategoryId, catObj.CategoryName);
+                if (result)
+                    return NoContent();
+
+                return NotFound();
             }
             catch (Exception)
             {
-
-                result = false;
+                return StatusCode(500, "Internal server error");
             }
-            return result;
         }
 
 
         [HttpDelete]
         [Authorize(Policy = "OwnerPolicy")]
-        public bool DeleteCategoryById(byte categoryId)
+        public IActionResult DeleteCategoryById(byte categoryId)
         {
-            bool result = false;
             try
             {
-                result = repository.DeleteCategory(categoryId);
+                var result = repository.DeleteCategory(categoryId);
+                if (result)
+                    return NoContent();
+
+                return NotFound();
             }
             catch (Exception)
             {
-                result = false;
+                return StatusCode(500, "Internal server error");
             }
-
-            return result;
         }
 
 

@@ -18,19 +18,25 @@ namespace NigelCommerce.ServiceAPI.Controllers
 
         [HttpPut]
         [Authorize(Policy = "OwnerPolicy")]
-        public bool UpdateRoleForUsers(RoleDTO roleDTO)
+        public IActionResult UpdateRoleForUsers([FromBody] RoleDTO roleDTO)
         {
-            bool status = false;
+            if (roleDTO == null || string.IsNullOrEmpty(roleDTO.EmailId) || string.IsNullOrEmpty(roleDTO.Role))
+            {
+                return BadRequest("EmailId and Role are required.");
+            }
+
             try
             {
+                bool status = repository.ChangeUserRole(roleDTO.EmailId, roleDTO.Role);
+                if (status)
+                    return Ok(new { Message = "Role updated successfully." });
 
-                status = repository.ChangeUserRole(roleDTO.EmailId, roleDTO.Role);
+                return NotFound(new { Message = "User not found or role not updated." });
             }
             catch (Exception)
             {
-                status = false;
+                return StatusCode(500, "Internal server error");
             }
-            return status;
         }
     }
 }

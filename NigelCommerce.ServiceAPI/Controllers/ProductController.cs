@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using NigelCommerce.DAL;
 using NigelCommerce.DAL.Models;
+using System;
+using System.Collections.Generic;
 
 namespace NigelCommerce.ServiceAPI.Controllers
 {
@@ -18,155 +20,152 @@ namespace NigelCommerce.ServiceAPI.Controllers
 
         [HttpGet]
         [Authorize(Policy = "CustomerPolicy")]
-        public JsonResult GetAllProducts()
+        public IActionResult GetAllProducts()
         {
-            List<Product> products = new List<Product>();
             try
             {
-                products = repository.GetAllProducts();
+                var products = repository.GetAllProducts();
+                if (products == null)
+                    return NotFound();
+                return Ok(products);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                products = null;
+                return StatusCode(500, "Internal server error");
             }
-            return Json(products);
         }
 
 
         [HttpGet]
         [Authorize(Policy = "CustomerPolicy")]
-        public JsonResult GetProductById(string productId)
+        public IActionResult GetProductById(string productId)
         {
-            Product product;
             try
             {
-                product = repository.GetProductById(productId);
+                var product = repository.GetProductById(productId);
+                if (product == null)
+                    return NotFound();
+                return Ok(product);
             }
             catch (Exception)
             {
-                product = null;
+                return StatusCode(500, "Internal server error");
             }
-            return Json(product);
         }
 
 
         [HttpPost]
         [Authorize(Policy = "CustomerPolicy")]
-        public JsonResult AddProductUsingParams(string productName, byte categoryId, decimal price, int quantityAvailable)
+        public IActionResult AddProductUsingParams(string productName, byte categoryId, decimal price, int quantityAvailable)
         {
-            bool status = false;
-            string productId;
-            string message;
             try
             {
-                status = repository.AddProduct(productName, categoryId, price, quantityAvailable, out productId);
+                bool status = repository.AddProduct(productName, categoryId, price, quantityAvailable, out string productId);
                 if (status)
                 {
-                    message = "Successful addition operation, ProductId = " + productId;
+                    return CreatedAtAction(nameof(GetProductById), new { productId = productId }, new { ProductId = productId });
                 }
-                else
-                {
-                    message = "Unsuccessful addition operation!";
-                }
+                return BadRequest("Unsuccessful addition operation.");
             }
             catch (Exception)
             {
-                message = "Some error occured, please try again!";
+                return StatusCode(500, "Internal server error");
             }
-            return Json(message);
         }
 
 
         [HttpPost]
         [Authorize(Policy = "CustomerPolicy")]
-        public JsonResult AddProductByModels(Product product)
+        public IActionResult AddProductByModels([FromBody] Product product)
         {
-            bool status = false;
-            string message;
+            if (product == null)
+                return BadRequest("Product is required.");
 
             try
             {
-                status = repository.AddProduct(product);
+                var status = repository.AddProduct(product);
                 if (status)
                 {
-                    message = "Successful addition operation, ProductId = " + product.ProductId;
+                    return CreatedAtAction(nameof(GetProductById), new { productId = product.ProductId }, product);
                 }
-                else
-                {
-                    message = "Unsuccessful addition operation!";
-                }
+                return BadRequest("Unsuccessful addition operation.");
             }
             catch (Exception)
             {
-                message = "Some error occured, please try again!";
+                return StatusCode(500, "Internal server error");
             }
-            return Json(message);
         }
 
 
         [HttpPut]
         [Authorize(Policy = "ManagerPolicy")]
-        public bool UpdateProductByEFModels(Product product)
+        public IActionResult UpdateProductByEFModels([FromBody] Product product)
         {
-            bool status = false;
+            if (product == null)
+                return BadRequest("Product is required.");
 
             try
             {
-                status = repository.UpdateProduct(product);
+                var status = repository.UpdateProduct(product);
+                if (status)
+                    return NoContent();
+                return NotFound();
             }
             catch (Exception)
             {
-                status = false;
+                return StatusCode(500, "Internal server error");
             }
-            return status;
         }
 
 
         [HttpPut]
         [Authorize(Policy = "ManagerPolicy")]
-        public bool UpdateProductByAPIModels(NigelCommerce.ServiceAPI.Models.Product product)
+        public IActionResult UpdateProductByAPIModels([FromBody] NigelCommerce.ServiceAPI.Models.Product product)
         {
-            bool status = false;
+            if (product == null)
+                return BadRequest("Product is required.");
 
             try
             {
-                if (ModelState.IsValid)
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                Product prodObj = new Product
                 {
-                    Product prodObj = new Product();
-                    prodObj.ProductId = product.ProductId;
-                    prodObj.ProductName = product.ProductName;
-                    prodObj.CategoryId = product.CategoryId;
-                    prodObj.Price = product.Price;
-                    prodObj.QuantityAvailable = product.QuantityAvailable;
-                    status = repository.UpdateProduct(prodObj);
-                }
-                else
-                {
-                    status = false;
-                }
+                    ProductId = product.ProductId,
+                    ProductName = product.ProductName,
+                    CategoryId = product.CategoryId,
+                    Price = product.Price,
+                    QuantityAvailable = product.QuantityAvailable
+                };
+
+                var status = repository.UpdateProduct(prodObj);
+                if (status)
+                    return NoContent();
+                return NotFound();
             }
             catch (Exception)
             {
-                status = false;
+                return StatusCode(500, "Internal server error");
             }
-            return status;
         }
 
 
         [HttpDelete]
         [Authorize(Policy = "OwnerPolicy")]
-        public JsonResult DeleteProduct(string productId)
+        public IActionResult DeleteProduct(string productId)
         {
-            bool status = false;
             try
             {
-                status = repository.DeleteProduct(productId);
+                var status = repository.DeleteProduct(productId);
+                if (status)
+                    return NoContent();
+                return NotFound();
             }
             catch (Exception)
             {
-                status = false;
+                return StatusCode(500, "Internal server error");
             }
-            return Json(status);
         }
     }
 }
