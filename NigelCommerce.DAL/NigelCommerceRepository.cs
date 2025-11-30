@@ -33,7 +33,7 @@ namespace NigelCommerce.DAL
             }
             catch (Exception)
             {
-                lstProducts = new List<Product>();
+                lstProducts = null;
             }
             return lstProducts;
         }
@@ -307,7 +307,59 @@ namespace NigelCommerce.DAL
         #endregion
 
 
-        #region Admin granting access EFCore methods
+        #region Users table related EF methods
+
+        #region - To add/register a new user with default role Customer (RoleId = 3)
+        public bool NewUserRegistraion(User user)
+        {
+            bool status = false;
+            try
+            {
+                if (user == null || string.IsNullOrEmpty(user.EmailId))
+                    return false;
+
+                // Prevent duplicate registration
+                var exists = dbContext.Users.Any(u => u.EmailId == user.EmailId);
+                if (exists)
+                    return false;
+
+                // Ensure default role is Customer (3) when not provided
+                if (!user.RoleId.HasValue || user.RoleId == 0)
+                    user.RoleId = 3; // Customer
+
+                dbContext.Users.Add(user);
+                dbContext.SaveChanges();
+                status = true;
+            }
+            catch (Exception)
+            {
+                status = false;
+            }
+            return status;
+        }
+        #endregion
+
+
+        #region - To validate user credentials and return user with role
+        public User ValidateUser(string email, string password)
+        {
+            User user = null;
+            try
+            {
+                user = dbContext.Users
+                              .Include(u => u.Role)
+                              .FirstOrDefault(u => u.EmailId == email && u.UserPassword == password);
+            }
+            catch (Exception)
+            {
+                user = null;
+            }
+            return user;
+        }
+        #endregion
+
+
+        #region - To Admins for granting access EFCore methods
         public bool ChangeUserRole(string userEmail, string role)
         {
             byte roleId;
@@ -351,22 +403,25 @@ namespace NigelCommerce.DAL
         #endregion
 
 
-        #region - To validate user credentials and return user with role
-        public User ValidateUser(string email, string password)
+        #region - To get all users details
+        public List<User> GetAllUsers()
         {
-            User user = null;
+            List<User> users = new List<User>();
             try
             {
-                user = dbContext.Users
-                              .Include(u => u.Role)
-                              .FirstOrDefault(u => u.EmailId == email && u.UserPassword == password);
+                users = dbContext.Users
+                    .OrderBy(u => u.EmailId)
+                    .ToList();
             }
             catch (Exception)
             {
-                user = null;
+                users = null;
             }
-            return user;
+
+            return users;
         }
+        #endregion
+
         #endregion
 
 

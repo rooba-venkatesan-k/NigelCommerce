@@ -13,7 +13,7 @@ public partial class User
 
     public string Gender { get; set; } = null!;
 
-    public DateOnly DateOfBirth { get; set; }
+    public DateOnly DOB { get; set; }
 
     public string Address { get; set; } = null!;
 
