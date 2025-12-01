@@ -63,3 +63,12 @@ Once the setup is complete, you can run the application using Visual Studio or t
 ```powershell
 dotnet run --project NigelCommerce.ServiceAPI
 ```
+
+## Getting Started with the API
+
+For detailed instructions on how to interact with the API, including user registration, authentication, and role-based operations, please refer to **[INSTRUCTIONS.md](INSTRUCTIONS.md)**.
+
+This guide covers:
+*   **User Registration**: How new users can register with a default Customer role.
+*   **Authentication**: How to log in and generate JWT tokens for API access.
+*   **Role-Based Operations**: What actions each role (Customer, Manager, Owner) can perform, including GET, ADD, UPDATE, and DELETE operations on products and managing user roles.
