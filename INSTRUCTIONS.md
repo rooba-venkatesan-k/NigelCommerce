@@ -122,3 +122,82 @@ Only an Owner can promote or demote users.
     }
     ```
     *(Valid Roles: "Customer", "Manager", "Owner")*
+
+---
+
+## 4. Sample User Details in SQL Script
+
+After executing the SQL scripts during database setup, the following sample users are available for testing different roles. You can use these credentials to log in and test various API operations without creating new users.
+
+### Users with Owner Permission
+
+These users have full access to all operations including delete, view all users, and change user roles.
+
+| Email | Password | Gender | Date of Birth |
+|-------|----------|--------|---------------|
+| Anzio_Don@org.com | don@123 | M | 1991-02-24 |
+| MeetRoda@fifet.com | ChristaRocks | M | 1990-04-20 |
+
+**Example Login:**
+```json
+{
+  "Email": "Anzio_Don@org.com",
+  "Password": "don@123"
+}
+```
+
+### Users with Manager Permission
+
+These users can perform GET, ADD, and UPDATE operations on products.
+
+| Email | Password | Gender | Date of Birth |
+|-------|----------|--------|---------------|
+| AmyFlower@outbook.com | CH2PS+Ab@# | M | 1981-09-11 |
+| Helenmeler@outbook.com | CO2SH+Ab@# | F | 1966-11-09 |
+| Leonardos@outbook.com | CO2MI+Ab@# | M | 1990-07-20 |
+| Mathew_Edmar@org.com | Divine@456 | M | 1989-09-12 |
+| Rine_Jamwal@org.com | spacejet | F | 1991-07-20 |
+| Ronden@outbook.com | BSB2V+Ab@# | F | 1979-08-26 |
+| Sanio_Neeba@org.com | AllIsGood | F | 1990-06-13 |
+| Sheldoy@outbook.com | CAC2U+Ab@# | F | 1981-09-14 |
+
+**Example Login:**
+```json
+{
+  "Email": "Mathew_Edmar@org.com",
+  "Password": "Divine@456"
+}
+```
+
+### Users with Customer Permission
+
+These users can perform GET and ADD operations on products.
+
+| Email | Password | Gender | Date of Birth |
+|-------|----------|--------|---------------|
+| Janine@outbook.com | RATTC+Ab@# | F | 1964-12-12 |
+| Josephs@outbook.com | CONSH+Ab@# | F | 1963-11-09 |
+| Karin@outbook.com | QUEEN+Ab@# | F | 1989-12-18 |
+| Karla@outbook.com | QUEDE+Ab@# | M | 1968-04-28 |
+| Karttunen@outbook.com | DRACD+Ab@# | M | 1963-06-27 |
+| Koskitalo@outbook.com | DUMON+Ab@# | F | 1966-01-28 |
+| Labrune@outbook.com | EASTC+Ab@# | F | 1980-02-09 |
+| Larsson@outbook.com | ERNSH+Ab@# | M | 1988-04-08 |
+
+**Example Login:**
+```json
+{
+  "Email": "Karin@outbook.com",
+  "Password": "QUEEN+Ab@#"
+}
+```
+
+---
+
+## Quick Start Guide
+
+1. **Execute SQL Scripts**: Run `Nigel Commerce DB Scripts.sql` to set up the database with sample data
+2. **Choose a User**: Select a user from the tables above based on the permissions you want to test
+3. **Login**: Use the `/api/Auth/Login` endpoint with the chosen credentials
+4. **Copy Token**: Save the JWT token from the login response
+5. **Test Operations**: Use the token in Postman's Authorization tab (Bearer Token) to test different API endpoints based on the user's role
