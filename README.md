@@ -50,7 +50,7 @@ Running this command will generate a GUID. Add the GUID in `<UserSecretsId>your-
 #### Set Secrets
 Run the following commands one by one in same location to configure the necessary secrets:
 ```powershell
-dotnet user-secrets set "ConnectionStrings:NigelCommerceDBConnectionString" "data source=(localdb)\\MSSQLLocalDB;initial catalog=NigelCommerceDB;Integrated security=True;"
+dotnet user-secrets set "ConnectionStrings:NigelCommerceDBConnectionString" "data source=(localdb)\MSSQLLocalDB;initial catalog=NigelCommerceDB;Integrated security=True;"
 dotnet user-secrets set "JWT:Key" "NigelCommerce_SuperSecretKey_For_JWT_Token_Generation_2025!"
 dotnet user-secrets set "JWT:Issuer" "NigelCommerce.ServiceAPI"
 dotnet user-secrets set "JWT:ExpiryInHours" "24"
